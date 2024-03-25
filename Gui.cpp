@@ -9,6 +9,7 @@
 #include "Gui.h"
 #include "Input.h"
 
+namespace Gui {
 
 const float applicationFontSize = 18;
 ImFont* font;
@@ -81,8 +82,8 @@ void _configureAndSubmitDockspace() {
 
   // Viewport resizing on window size change
   ImGuiViewport* viewport = ImGui::GetMainViewport();
-  viewport->Size          = { (float) vrWindowWidth, (float) vrWindowHeight };
-  viewport->WorkSize      = { (float) vrWindowWidth, (float) vrWindowHeight };
+  viewport->Size          = { (float) Input::vrWindowWidth, (float) Input::vrWindowHeight };
+  viewport->WorkSize      = { (float) Input::vrWindowWidth, (float) Input::vrWindowHeight };
   viewport->Flags |= ( viewport->Flags & ImGuiViewportFlags_IsMinimized ); // Preserve existing flags
 
   // Set dockspace window position and size based on viewport
@@ -230,3 +231,5 @@ void _applyDarkTheme() {
   style.LogSliderDeadzone = 4;
   style.TabRounding       = 1;
 }
+
+} // namespace Gui

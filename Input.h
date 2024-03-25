@@ -8,6 +8,8 @@
 #include <GLFW/glfw3.h>
 #include <mujoco/mujoco.h>
 
+namespace Input {
+
 extern const double vrZoomSpeed;
 
 extern double vrMousePosX;
@@ -26,5 +28,7 @@ extern int vrWindowHeight;
 
 void ensureDeltaZeroFirstFrame( GLFWwindow* window );
 void processInputs( GLFWwindow* window, mjModel* model, mjData* data, mjvScene* scene, mjvCamera* camera );
+
+} // namespace Input
 
 #endif // SIMULATE2_INPUT_H

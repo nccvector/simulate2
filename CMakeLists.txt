@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-project(sim2 LANGUAGES C CXX)
+project(simulate2 LANGUAGES C CXX)
 
 # Default to GLVND if available.
 cmake_policy(SET CMP0072 NEW)

@@ -36,6 +36,8 @@ set(IMGUI_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends/imgui_impl_opengl3.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends/imgui_impl_glfw.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/misc/cpp/imgui_stdlib.cpp
+        Gui.h
+        Gui.cpp
 )
 
 find_package(mujoco REQUIRED)

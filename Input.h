@@ -24,10 +24,12 @@ extern double vrMouseScrollDeltaY;
 extern int vrWindowWidth;
 extern int vrWindowHeight;
 
+void processInputs( GLFWwindow* window, mjModel* model, mjData* data, mjvScene* scene, mjvCamera* camera );
+
 // GLFW only supports callbacks for scroll. There is no function like glfwGetScroll etc
 void _scrollCallback( GLFWwindow* window, double x, double y );
 void _ensureDeltaZeroFirstFrame( GLFWwindow* window );
-void processGuiInputs(GLFWwindow* window);
+void processGuiInputs( GLFWwindow* window );
 void processViewportInputs( GLFWwindow* window, mjModel* model, mjvScene* scene, mjvCamera* camera );
 
 #endif // SIMULATE2_INPUT_H

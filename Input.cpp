@@ -22,6 +22,15 @@ double vrMouseScrollDeltaY;
 int vrWindowWidth;
 int vrWindowHeight;
 
+void processInputs( GLFWwindow* window, mjModel* model, mjData* data, mjvScene* scene, mjvCamera* camera ) {
+  ImGuiIO& io = ImGui::GetIO();
+  if ( io.WantCaptureMouse ) {
+    processGuiInputs( window );
+  } else {
+    processViewportInputs( window, model, scene, camera );
+  }
+}
+
 // GLFW only supports callbacks for scroll. There is no function like glfwGetScroll etc
 void _scrollCallback( GLFWwindow* window, double x, double y ) {
   vrMouseScrollDeltaX = x;
@@ -45,8 +54,8 @@ void _ensureDeltaZeroFirstFrame( GLFWwindow* window ) {
   }
 }
 
-void processGuiInputs(GLFWwindow* window) {
-  _ensureDeltaZeroFirstFrame(window);
+void processGuiInputs( GLFWwindow* window ) {
+  _ensureDeltaZeroFirstFrame( window );
 
   ImGuiIO& io    = ImGui::GetIO();
   io.MouseWheelH = vrMouseScrollDeltaX * vrZoomSpeed * 10;

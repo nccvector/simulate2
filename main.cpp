@@ -2,21 +2,18 @@
 // Created by vector on 24/03/23.
 //
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <mujoco/mujoco.h>
 
 // Add imgui
 #include <imgui_internal.h>
-#include <iostream>
-#include <string>
 #include <fmt/core.h>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "ViewportRoutines.h"
+#include "Input.h"
 
 const float applicationFontSize = 18;
 ImFont* font;
@@ -142,8 +139,8 @@ void configureAndSubmitDockspace() {
 
   // Viewport resizing on window size change
   ImGuiViewport* viewport = ImGui::GetMainViewport();
-  viewport->Size          = {(float) vrWindowWidth, (float) vrWindowHeight};
-  viewport->WorkSize      = {(float) vrWindowWidth, (float) vrWindowHeight};
+  viewport->Size          = { (float) vrWindowWidth, (float) vrWindowHeight };
+  viewport->WorkSize      = { (float) vrWindowWidth, (float) vrWindowHeight };
   viewport->Flags |= ( viewport->Flags & ImGuiViewportFlags_IsMinimized ); // Preserve existing flags
 
   // Set dockspace window position and size based on viewport
@@ -183,7 +180,7 @@ void createStatePanel( mjModel* model, mjData* data ) {
   int numDOFs = model->nq;
 
   ImGui::Begin( "State" );
-  for (int i = 0; i < numDOFs; i++) {
+  for ( int i = 0; i < numDOFs; i++ ) {
     ImGui::Text( fmt::format( "q[{0}]: {1}", i, data->qpos[i] ).c_str() );
   }
 
@@ -195,17 +192,11 @@ void createControlPanel( mjModel* model, mjData* data ) {
   float controlValues[numDOFs];
 
   ImGui::Begin( "Control" );
-  for (int i = 0; i < numDOFs; i++) {
+  for ( int i = 0; i < numDOFs; i++ ) {
     // Get current control
     controlValues[i] = data->ctrl[i];
 
-    ImGui::SliderFloat(
-        fmt::format( "ctrl[{0}] ", i ).c_str(),
-        &controlValues[i],
-        -10.0f,
-        10.0f,
-        "%.3f"
-        );
+    ImGui::SliderFloat( fmt::format( "ctrl[{0}] ", i ).c_str(), &controlValues[i], -10.0f, 10.0f, "%.3f" );
 
     // Apply modified control
     data->ctrl[i] = controlValues[i];
@@ -236,17 +227,6 @@ void renderGui( mjModel* model, mjData* data ) {
   ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
 }
 
-void processGuiInputs() {
-  ImGuiIO& io    = ImGui::GetIO();
-  io.MouseWheelH = vrMouseScrollDeltaX * vrZoomSpeed * 10;
-  io.MouseWheel  = vrMouseScrollDeltaY * vrZoomSpeed * 10;
-
-  // Reset after consumption
-  vrMouseScrollDeltaX = 0;
-  vrMouseScrollDeltaY = 0;
-}
-
-
 int main() {
   const int errBufferLen = 1000;
   char err[errBufferLen];
@@ -259,7 +239,7 @@ int main() {
   mjrContext con; // custom GPU context
 
   // init GLFW
-  if (!glfwInit()) {
+  if ( !glfwInit() ) {
     mju_error( "Could not initialize GLFW" );
   }
 
@@ -281,10 +261,10 @@ int main() {
   mjr_makeContext( model, &con, mjFONTSCALE_150 );
 
   // run main loop, target real-time simulation and 60 fps rendering
-  while (!glfwWindowShouldClose( window )) {
+  while ( !glfwWindowShouldClose( window ) ) {
     ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse) {
-      processGuiInputs();
+    if ( io.WantCaptureMouse ) {
+      processGuiInputs(window);
     } else {
       processViewportInputs( window, model, &scene, &cam );
     }
@@ -294,12 +274,12 @@ int main() {
     //  this loop will finish on time for the next frame to be rendered at 60 fps.
     //  Otherwise add a cpu timer and exit this loop when it is time to render.
     mjtNum simstart = data->time;
-    while (data->time - simstart < 1.0 / 60.0) {
+    while ( data->time - simstart < 1.0 / 60.0 ) {
       mj_step( model, data );
     }
 
     // get framebuffer viewport
-    mjrRect viewport = {0, 0, 0, 0};
+    mjrRect viewport = { 0, 0, 0, 0 };
     glfwGetFramebufferSize( window, &viewport.width, &viewport.height );
 
     // update scene and render
@@ -318,7 +298,7 @@ int main() {
 
   destroyGui();
 
-  //free visualization storage
+  // free visualization storage
   mjv_freeScene( &scene );
   mjr_freeContext( &con );
 

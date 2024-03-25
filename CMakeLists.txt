@@ -38,7 +38,6 @@ set(IMGUI_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/misc/cpp/imgui_stdlib.cpp
 )
 
-
 find_package(mujoco REQUIRED)
 
 include_directories(
@@ -52,7 +51,8 @@ include_directories(
 add_executable(${PROJECT_NAME}
         main.cpp
         ${IMGUI_SRCS}
-        ViewportRoutines.h
+        Input.cpp
+        ViewportRoutines.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

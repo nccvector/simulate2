@@ -22,7 +22,7 @@ void _createStatePanel( mjModel* model, mjData* data );
 void _createControlPanel( mjModel* model, mjData* data );
 
 
-void renderGui( mjModel* model, mjData* data ) {
+void render( mjModel* model, mjData* data ) {
   ImGui::NewFrame();
 
   // Set theme
@@ -44,7 +44,7 @@ void renderGui( mjModel* model, mjData* data ) {
   ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
 }
 
-void initGui( GLFWwindow* window ) {
+void init( GLFWwindow* window ) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL( window, true );
@@ -60,7 +60,7 @@ void initGui( GLFWwindow* window ) {
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
-void destroyGui() {
+void destroy() {
   // Destroy GUI
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();

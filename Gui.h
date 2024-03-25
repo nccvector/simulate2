@@ -15,9 +15,9 @@ namespace Gui {
 extern const float applicationFontSize;
 extern ImFont* font;
 
-void initGui( GLFWwindow* window );
-void destroyGui();
-void renderGui( mjModel* model, mjData* data );
+void init( GLFWwindow* window );
+void destroy();
+void render( mjModel* model, mjData* data );
 
 } // namespace Gui
 

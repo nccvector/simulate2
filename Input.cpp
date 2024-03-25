@@ -30,7 +30,7 @@ void _processGuiInputs( GLFWwindow* window );
 void _processViewportInputs( GLFWwindow* window, mjModel* model, mjvScene* scene, mjvCamera* camera );
 
 
-void processInputs( GLFWwindow* window, mjModel* model, mjData* data, mjvScene* scene, mjvCamera* camera ) {
+void process( GLFWwindow* window, mjModel* model, mjData* data, mjvScene* scene, mjvCamera* camera ) {
   ImGuiIO& io = ImGui::GetIO();
   if ( io.WantCaptureMouse ) {
     _processGuiInputs( window );

@@ -32,7 +32,7 @@ int main() {
   glfwMakeContextCurrent( window );
   glfwSwapInterval( 1 );
 
-  Gui::initGui( window );
+  Gui::init( window );
 
   // initialize visualization data structures
   mjv_defaultCamera( &cam );
@@ -46,7 +46,8 @@ int main() {
 
   // run main loop, target real-time simulation and 60 fps rendering
   while ( !glfwWindowShouldClose( window ) ) {
-    Input::processInputs( window, model, data, &scene, &cam );
+    // Process inputs
+    Input::process( window, model, data, &scene, &cam );
 
     // advance interactive simulation for 1/60 sec
     //  Assuming MuJoCo can simulate faster than real-time, which it usually can,
@@ -66,7 +67,7 @@ int main() {
 
     mjr_render( viewport, &scene, &con );
 
-    Gui::renderGui( model, data );
+    Gui::render( model, data );
 
     // swap OpenGL buffers (blocking call due to v-sync)
     glfwSwapBuffers( window );
@@ -75,7 +76,7 @@ int main() {
     glfwPollEvents();
   }
 
-  Gui::destroyGui();
+  Gui::destroy();
 
   // free visualization storage
   mjv_freeScene( &scene );

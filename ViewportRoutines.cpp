@@ -58,9 +58,9 @@ void _processViewportPanInput( GLFWwindow* window, mjModel* model, mjvScene* sce
   }
 }
 
-void processViewportInputs( GLFWwindow* window, mjModel* model, mjvScene* scene, mjvCamera* camera ) {
+void _processViewportInputs( GLFWwindow* window, mjModel* model, mjvScene* scene, mjvCamera* camera ) {
   // Initialize data for first frame
-  _ensureDeltaZeroFirstFrame( window );
+  ensureDeltaZeroFirstFrame( window );
 
   _processViewportRotateInput( window, model, scene, camera );
   _processViewportZoomInput( window, model, scene, camera );

@@ -14,13 +14,33 @@ const float applicationFontSize = 18;
 ImFont* font;
 
 
-void _loadFonts() {
-  // Load default font
-  ImGuiIO& io = ImGui::GetIO();
-  io.Fonts->AddFontDefault();
+void _loadFonts();
+void _applyDarkTheme();
+void _configureAndSubmitDockspace();
+void _createStatePanel( mjModel* model, mjData* data );
+void _createControlPanel( mjModel* model, mjData* data );
 
-  // Load custom font
-  font = io.Fonts->AddFontFromFileTTF( "resources/fonts/Roboto-Regular.ttf", applicationFontSize );
+
+void renderGui( mjModel* model, mjData* data ) {
+  ImGui::NewFrame();
+
+  // Set theme
+  _applyDarkTheme();
+
+  ImGui::PushFont( font );
+
+  // Will allow windows to be docked
+  _configureAndSubmitDockspace();
+
+  _createStatePanel( model, data );
+  _createControlPanel( model, data );
+
+  ImGui::ShowDemoWindow( nullptr );
+
+  ImGui::PopFont();
+
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
 }
 
 void initGui( GLFWwindow* window ) {
@@ -46,7 +66,89 @@ void destroyGui() {
   ImGui::DestroyContext();
 }
 
-void _embraceTheDarkness() {
+void _loadFonts() {
+  // Load default font
+  ImGuiIO& io = ImGui::GetIO();
+  io.Fonts->AddFontDefault();
+
+  // Load custom font
+  font = io.Fonts->AddFontFromFileTTF( "resources/fonts/Roboto-Regular.ttf", applicationFontSize );
+}
+
+void _configureAndSubmitDockspace() {
+  ImGuiIO& io                               = ImGui::GetIO();
+  static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+
+  // Viewport resizing on window size change
+  ImGuiViewport* viewport = ImGui::GetMainViewport();
+  viewport->Size          = { (float) vrWindowWidth, (float) vrWindowHeight };
+  viewport->WorkSize      = { (float) vrWindowWidth, (float) vrWindowHeight };
+  viewport->Flags |= ( viewport->Flags & ImGuiViewportFlags_IsMinimized ); // Preserve existing flags
+
+  // Set dockspace window position and size based on viewport
+  ImGui::SetNextWindowPos( viewport->WorkPos );
+  ImGui::SetNextWindowSize( viewport->WorkSize );
+  ImGui::SetNextWindowViewport( viewport->ID );
+
+  // Set dockspace window style (no border, no padding, no rounding yata yata)
+  ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
+  ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.0f );
+  ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
+
+  // Set dockspace window flags (menu bar, no back ground etc)
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
+  windowFlags |= ImGuiWindowFlags_NoDocking;
+  windowFlags |= ImGuiWindowFlags_NoTitleBar;
+  windowFlags |= ImGuiWindowFlags_NoCollapse;
+  windowFlags |= ImGuiWindowFlags_NoResize;
+  windowFlags |= ImGuiWindowFlags_NoMove;
+  windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+  windowFlags |= ImGuiWindowFlags_NoNavFocus;
+  windowFlags |= ImGuiWindowFlags_NoBackground;
+
+  bool p;
+  ImGui::Begin( "DockSpace", &p, windowFlags );
+
+  // Submit dockspace inside a window
+  ImGuiID dockspace_id = ImGui::GetID( "MyDockSpace" );
+  ImGui::DockSpace( dockspace_id, ImVec2( 0.0f, 0.0f ), dockspace_flags );
+
+  ImGui::End();
+
+  ImGui::PopStyleVar( 3 );
+}
+
+void _createStatePanel( mjModel* model, mjData* data ) {
+  int numDOFs = model->nq;
+
+  ImGui::Begin( "State" );
+  for ( int i = 0; i < numDOFs; i++ ) {
+    ImGui::Text( fmt::format( "q[{0}]: {1}", i, data->qpos[i] ).c_str() );
+  }
+
+  ImGui::End();
+}
+
+void _createControlPanel( mjModel* model, mjData* data ) {
+  const int numDOFs = model->nu;
+  float controlValues[numDOFs];
+
+  ImGui::Begin( "Control" );
+  for ( int i = 0; i < numDOFs; i++ ) {
+    // Get current control
+    controlValues[i] = data->ctrl[i];
+
+    ImGui::SliderFloat( fmt::format( "ctrl[{0}] ", i ).c_str(), &controlValues[i], -10.0f, 10.0f, "%.3f" );
+
+    // Apply modified control
+    data->ctrl[i] = controlValues[i];
+  }
+
+  ImGui::End();
+}
+
+
+void _applyDarkTheme() {
   ImVec4* colors                         = ImGui::GetStyle().Colors;
   colors[ImGuiCol_Text]                  = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
   colors[ImGuiCol_TextDisabled]          = ImVec4( 0.50f, 0.50f, 0.50f, 1.00f );
@@ -127,98 +229,4 @@ void _embraceTheDarkness() {
   style.GrabRounding      = 3;
   style.LogSliderDeadzone = 4;
   style.TabRounding       = 1;
-}
-
-void _configureAndSubmitDockspace() {
-  ImGuiIO& io                               = ImGui::GetIO();
-  static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
-
-  // Viewport resizing on window size change
-  ImGuiViewport* viewport = ImGui::GetMainViewport();
-  viewport->Size          = { (float) vrWindowWidth, (float) vrWindowHeight };
-  viewport->WorkSize      = { (float) vrWindowWidth, (float) vrWindowHeight };
-  viewport->Flags |= ( viewport->Flags & ImGuiViewportFlags_IsMinimized ); // Preserve existing flags
-
-  // Set dockspace window position and size based on viewport
-  ImGui::SetNextWindowPos( viewport->WorkPos );
-  ImGui::SetNextWindowSize( viewport->WorkSize );
-  ImGui::SetNextWindowViewport( viewport->ID );
-
-  // Set dockspace window style (no border, no padding, no rounding yata yata)
-  ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
-  ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.0f );
-  ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
-
-  // Set dockspace window flags (menu bar, no back ground etc)
-  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
-  windowFlags |= ImGuiWindowFlags_NoDocking;
-  windowFlags |= ImGuiWindowFlags_NoTitleBar;
-  windowFlags |= ImGuiWindowFlags_NoCollapse;
-  windowFlags |= ImGuiWindowFlags_NoResize;
-  windowFlags |= ImGuiWindowFlags_NoMove;
-  windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-  windowFlags |= ImGuiWindowFlags_NoNavFocus;
-  windowFlags |= ImGuiWindowFlags_NoBackground;
-
-  bool p;
-  ImGui::Begin( "DockSpace", &p, windowFlags );
-
-  // Submit dockspace inside a window
-  ImGuiID dockspace_id = ImGui::GetID( "MyDockSpace" );
-  ImGui::DockSpace( dockspace_id, ImVec2( 0.0f, 0.0f ), dockspace_flags );
-
-  ImGui::End();
-
-  ImGui::PopStyleVar( 3 );
-}
-
-void _createStatePanel( mjModel* model, mjData* data ) {
-  int numDOFs = model->nq;
-
-  ImGui::Begin( "State" );
-  for ( int i = 0; i < numDOFs; i++ ) {
-    ImGui::Text( fmt::format( "q[{0}]: {1}", i, data->qpos[i] ).c_str() );
-  }
-
-  ImGui::End();
-}
-
-void _createControlPanel( mjModel* model, mjData* data ) {
-  const int numDOFs = model->nu;
-  float controlValues[numDOFs];
-
-  ImGui::Begin( "Control" );
-  for ( int i = 0; i < numDOFs; i++ ) {
-    // Get current control
-    controlValues[i] = data->ctrl[i];
-
-    ImGui::SliderFloat( fmt::format( "ctrl[{0}] ", i ).c_str(), &controlValues[i], -10.0f, 10.0f, "%.3f" );
-
-    // Apply modified control
-    data->ctrl[i] = controlValues[i];
-  }
-
-  ImGui::End();
-}
-
-void renderGui( mjModel* model, mjData* data ) {
-  ImGui::NewFrame();
-
-  // Set theme
-  _embraceTheDarkness();
-
-  ImGui::PushFont( font );
-
-  // Will allow windows to be docked
-  _configureAndSubmitDockspace();
-
-  _createStatePanel( model, data );
-  _createControlPanel( model, data );
-
-  ImGui::ShowDemoWindow( nullptr );
-
-  ImGui::PopFont();
-
-  ImGui::Render();
-  ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
 }

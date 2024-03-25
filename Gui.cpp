@@ -9,6 +9,60 @@
 #include "Gui.h"
 #include "Input.h"
 
+
+#include <iostream>
+#include <glob.h>   // glob(), globfree()
+#include <string.h> // memset()
+#include <vector>
+#include <stdexcept>
+#include <string>
+#include <sstream>
+
+std::vector<std::string> glob( const std::string& pattern ) {
+  using namespace std;
+
+  // glob struct resides on the stack
+  glob_t glob_result;
+  memset( &glob_result, 0, sizeof( glob_result ) );
+
+  // do the glob operation
+  int return_value = glob( pattern.c_str(), GLOB_TILDE, NULL, &glob_result );
+  if ( return_value != 0 ) {
+    globfree( &glob_result );
+    return std::vector<string>();
+  }
+
+  // collect all the filenames into a std::list<std::string>
+  vector<string> filenames;
+  for ( size_t i = 0; i < glob_result.gl_pathc; ++i ) {
+    filenames.push_back( string( glob_result.gl_pathv[i] ) );
+  }
+
+  // cleanup
+  globfree( &glob_result );
+
+  // done
+  return filenames;
+}
+
+std::vector<std::string> getMujocoMenagerieScenePaths(){
+  std::vector<std::string> paths = glob( "resources/mujoco_menagerie/*/" );
+
+  std::vector<std::string> sceneXmlPaths;
+  for(auto path : paths)
+  {
+    std::vector<std::string> subSceneXmlPaths = glob(path + "scene*.xml");
+
+    if(subSceneXmlPaths.size() > 0)
+    {
+      // Only take the first scene
+      sceneXmlPaths.push_back(subSceneXmlPaths[0]);
+    }
+  }
+
+  return sceneXmlPaths;
+}
+
 namespace Gui {
 
 const float applicationFontSize = 18;
@@ -20,6 +74,30 @@ void _applyDarkTheme();
 void _configureAndSubmitDockspace();
 void _createStatePanel( mjModel* model, mjData* data );
 void _createControlPanel( mjModel* model, mjData* data );
+void _createSceneDropdown() {
+
+  ImGui::Begin("Select scene");
+
+  // Only load once
+  static std::vector<std::string> paths = getMujocoMenagerieScenePaths();
+
+  const char* items[paths.size()];
+  for (int i=0; i<paths.size(); i++){
+    items[i] = paths[i].c_str();
+  }
+  static int currentItem = 0;
+
+  ImGui::PushItemWidth(-1);
+  ImGui::ListBox("Select scene", &currentItem, items, paths.size(), 10);
+  ImGui::PopItemWidth();
+
+  if(ImGui::Button("Load"))
+  {
+    std::cout << "Loading " << items[currentItem] << "\n";
+  }
+
+  ImGui::End();
+}
 
 
 void render( mjModel* model, mjData* data ) {
@@ -36,6 +114,8 @@ void render( mjModel* model, mjData* data ) {
   _createStatePanel( model, data );
   _createControlPanel( model, data );
 
+  _createSceneDropdown();
+
   ImGui::ShowDemoWindow( nullptr );
 
   ImGui::PopFont();
@@ -45,6 +125,7 @@ void render( mjModel* model, mjData* data ) {
 }
 
 void init( GLFWwindow* window ) {
+
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL( window, true );

@@ -1,0 +1,53 @@
+<mujoco model="ugv">
+    <option gravity="0 0 -10"/>
+
+    <!--Actuators-->
+    <actuator>
+        <position class="actuator" joint="frontRightJoint"/>
+        <position class="actuator" joint="frontLeftJoint"/>
+        <position class="actuator" joint="rearRightJoint"/>
+        <position class="actuator" joint="rearLeftJoint"/>
+    </actuator>
+
+    <!--Default coeffs for position control-->
+    <default class="ugv">
+        <default class="actuator">
+            <position kp="100" kv="20"/>
+        </default>
+    </default>
+
+    <!--Default coeffs for wheel-->
+    <default class="ugv">
+        <default class="wheel">
+            <joint type="hinge"/>
+            <geom type="cylinder" size="0.3 0.075" rgba="0 1 0 1"/>
+        </default>
+    </default>
+
+    <worldbody>
+        <light diffuse="0.5 0.5 0.5" pos="0 0 3" dir="0 0 -1"/>
+        <geom type="plane" size="1000.0 1000.0 0.1"/>
+        <body name="chassis" pos="0 0 1" euler="0 0 0">
+            <joint type="free"/>
+            <geom type="box" size="0.55 0.3 0.16" rgba="1 0 0 1"/>
+
+            <!--Wheels-->
+            <body name="frontRightWheel" pos="0.5 -0.4 0" euler="90 0 0">
+                <joint class="wheel" name="frontRightJoint"/>
+                <geom class="wheel"/>
+            </body>
+            <body name="frontLeftWheel" pos="0.5 0.4 0" euler="90 0 0">
+                <joint class="wheel" name="frontLeftJoint"/>
+                <geom class="wheel"/>
+            </body>
+            <body name="rearRightWheel" pos="-0.5 -0.4 0" euler="90 0 0">
+                <joint class="wheel" name="rearRightJoint"/>
+                <geom class="wheel"/>
+            </body>
+            <body name="rearLeftWheel" pos="-0.5 0.4 0" euler="90 0 0">
+                <joint class="wheel" name="rearLeftJoint"/>
+                <geom class="wheel"/>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

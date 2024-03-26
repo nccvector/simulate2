@@ -64,6 +64,9 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # Copy resources on change
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini
+        DESTINATION ${CMAKE_BINARY_DIR})
+
 add_custom_target(copy-files ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/resources

@@ -53,6 +53,7 @@ add_executable(${PROJECT_NAME}
         Input.cpp
         Gui.cpp
         ViewportRoutines.cpp
+        Simulation.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

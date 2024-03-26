@@ -8,15 +8,14 @@
 
 #include "Gui.h"
 #include "Input.h"
+#include "Simulation.h"
 
 
 #include <iostream>
 #include <glob.h>   // glob(), globfree()
 #include <string.h> // memset()
 #include <vector>
-#include <stdexcept>
 #include <string>
-#include <sstream>
 
 std::vector<std::string> glob( const std::string& pattern ) {
   using namespace std;
@@ -45,18 +44,16 @@ std::vector<std::string> glob( const std::string& pattern ) {
   return filenames;
 }
 
-std::vector<std::string> getMujocoMenagerieScenePaths(){
+std::vector<std::string> getMujocoMenagerieScenePaths() {
   std::vector<std::string> paths = glob( "resources/mujoco_menagerie/*/" );
 
   std::vector<std::string> sceneXmlPaths;
-  for(auto path : paths)
-  {
-    std::vector<std::string> subSceneXmlPaths = glob(path + "scene*.xml");
+  for ( auto path : paths ) {
+    std::vector<std::string> subSceneXmlPaths = glob( path + "scene*.xml" );
 
-    if(subSceneXmlPaths.size() > 0)
-    {
+    if ( subSceneXmlPaths.size() > 0 ) {
       // Only take the first scene
-      sceneXmlPaths.push_back(subSceneXmlPaths[0]);
+      sceneXmlPaths.push_back( subSceneXmlPaths[0] );
     }
   }
 
@@ -76,24 +73,27 @@ void _createStatePanel( mjModel* model, mjData* data );
 void _createControlPanel( mjModel* model, mjData* data );
 void _createSceneDropdown() {
 
-  ImGui::Begin("Select scene");
+  ImGui::Begin( "Select scene" );
 
   // Only load once
   static std::vector<std::string> paths = getMujocoMenagerieScenePaths();
 
   const char* items[paths.size()];
-  for (int i=0; i<paths.size(); i++){
+  for ( int i = 0; i < paths.size(); i++ ) {
     items[i] = paths[i].c_str();
   }
   static int currentItem = 0;
 
-  ImGui::PushItemWidth(-1);
-  ImGui::ListBox("Select scene", &currentItem, items, paths.size(), 10);
+  ImGui::PushItemWidth( -1 );
+  ImGui::ListBox( "Select scene", &currentItem, items, paths.size(), 10 );
   ImGui::PopItemWidth();
 
-  if(ImGui::Button("Load"))
-  {
+  if ( ImGui::Button( "Load" ) ) {
+    std::cout << "Destroying current scene...\n";
+    Simulation::unloadScene();
+
     std::cout << "Loading " << items[currentItem] << "\n";
+    Simulation::loadScene(items[currentItem]);
   }
 
   ImGui::End();

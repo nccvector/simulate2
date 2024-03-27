@@ -69,6 +69,7 @@ ImFont* font;
 void _loadFonts();
 void _applyDarkTheme();
 void _configureAndSubmitDockspace();
+void _createMenuBar(mjvScene* scene);
 void _createStatePanel( mjModel* model, mjData* data );
 void _createControlPanel( mjModel* model, mjData* data );
 void _createSceneDropdown() {
@@ -90,10 +91,10 @@ void _createSceneDropdown() {
 
   if ( ImGui::Button( "Load" ) ) {
     std::cout << "Destroying current scene...\n";
-    Simulation::unloadScene();
+    Simulation::unloadScene();  // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
 
     std::cout << "Loading " << items[currentItem] << "\n";
-    Simulation::loadScene(items[currentItem]);
+    Simulation::loadScene(items[currentItem]);  // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
   }
 
   ImGui::End();
@@ -111,6 +112,7 @@ void render( mjModel* model, mjData* data ) {
   // Will allow windows to be docked
   _configureAndSubmitDockspace();
 
+  _createMenuBar(&Simulation::scene);   // TODO: get this scene as a parameter to this function
   _createStatePanel( model, data );
   _createControlPanel( model, data );
 
@@ -178,8 +180,7 @@ void _configureAndSubmitDockspace() {
   ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
 
   // Set dockspace window flags (menu bar, no back ground etc)
-  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
-  windowFlags |= ImGuiWindowFlags_NoDocking;
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
   windowFlags |= ImGuiWindowFlags_NoTitleBar;
   windowFlags |= ImGuiWindowFlags_NoCollapse;
   windowFlags |= ImGuiWindowFlags_NoResize;
@@ -227,6 +228,31 @@ void _createControlPanel( mjModel* model, mjData* data ) {
   }
 
   ImGui::End();
+}
+
+void _createMenuBar(mjvScene* scene){
+  if (ImGui::BeginMainMenuBar())
+  {
+    if (ImGui::BeginMenu("File"))
+    {
+      ImGui::MenuItem("Do nothing...");
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Rendering"))
+    {
+      if (ImGui::MenuItem("Wireframe", "[No shortcut]")) {
+        scene->flags[mjRND_WIREFRAME] = 1;
+      }
+      if (ImGui::MenuItem("Shading", "[No shortcut]")) {
+        scene->flags[mjRND_WIREFRAME] = 0;
+      }  // Disabled item
+      if (ImGui::MenuItem("Disabled option", "[No shortcut]", false, false)) {}  // Disabled item
+      ImGui::Separator();
+      if (ImGui::MenuItem("Do nothing", "CTRL+X")) {}
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+  }
 }
 
 

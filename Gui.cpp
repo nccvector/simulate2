@@ -11,7 +11,10 @@
 #include "Simulation.h"
 
 
+#include <map>
 #include <iostream>
+#include <thread>
+#include <chrono>
 #include <glob.h>   // glob(), globfree()
 #include <string.h> // memset()
 #include <vector>
@@ -69,7 +72,7 @@ ImFont* font;
 void _loadFonts();
 void _applyDarkTheme();
 void _configureAndSubmitDockspace();
-void _createMenuBar(mjvScene* scene);
+void _createMenuBar( mjvScene* scene, mjvOption* option );
 void _createStatePanel( mjModel* model, mjData* data );
 void _createControlPanel( mjModel* model, mjData* data );
 void _createSceneDropdown() {
@@ -91,10 +94,11 @@ void _createSceneDropdown() {
 
   if ( ImGui::Button( "Load" ) ) {
     std::cout << "Destroying current scene...\n";
-    Simulation::unloadScene();  // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
+    Simulation::unloadScene(); // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
 
     std::cout << "Loading " << items[currentItem] << "\n";
-    Simulation::loadScene(items[currentItem]);  // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
+    Simulation::loadScene(
+        items[currentItem] ); // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
   }
 
   ImGui::End();
@@ -112,10 +116,13 @@ void render( mjModel* model, mjData* data ) {
   // Will allow windows to be docked
   _configureAndSubmitDockspace();
 
-  _createMenuBar(&Simulation::scene);   // TODO: get this scene as a parameter to this function
+  _createMenuBar( &Simulation::scene, &Simulation::opt ); // TODO: get this scene as a parameter to this function
   _createStatePanel( model, data );
   _createControlPanel( model, data );
 
+  // IMPORTANT: Keep this below (putting it above state and control panel causes segfault)
+  // The qpos and ctrl are not fully initialized after loading, they need atleast one updatesim call to initialize
+  // A correct fix would be to call updatesim after loading new scene
   _createSceneDropdown();
 
   ImGui::ShowDemoWindow( nullptr );
@@ -230,27 +237,55 @@ void _createControlPanel( mjModel* model, mjData* data ) {
   ImGui::End();
 }
 
-void _createMenuBar(mjvScene* scene){
-  if (ImGui::BeginMainMenuBar())
-  {
-    if (ImGui::BeginMenu("File"))
-    {
-      ImGui::MenuItem("Do nothing...");
+void __selectableOptionFromFlag(const char* name, mjtByte& flag){
+  static std::map<std::string, bool> selectStates;
+
+  selectStates[name] = flag;
+
+  if ( ImGui::Checkbox( name, &selectStates[name]) ) {
+    flag = selectStates[name];
+  }
+}
+
+void _createMenuBar( mjvScene* scene, mjvOption* option ) {
+  if ( ImGui::BeginMainMenuBar() ) {
+    if ( ImGui::BeginMenu( "File" ) ) {
+      ImGui::MenuItem( "Do nothing..." );
       ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu("Rendering"))
-    {
-      if (ImGui::MenuItem("Wireframe", "[No shortcut]")) {
-        scene->flags[mjRND_WIREFRAME] = 1;
-      }
-      if (ImGui::MenuItem("Shading", "[No shortcut]")) {
-        scene->flags[mjRND_WIREFRAME] = 0;
-      }  // Disabled item
-      if (ImGui::MenuItem("Disabled option", "[No shortcut]", false, false)) {}  // Disabled item
+
+    if ( ImGui::BeginMenu( "Rendering" ) ) {
+      __selectableOptionFromFlag("Wireframe", scene->flags[mjRND_WIREFRAME]);
+      __selectableOptionFromFlag("Shadows", scene->flags[mjRND_SHADOW]);
+      __selectableOptionFromFlag("Reflection", scene->flags[mjRND_REFLECTION]);
+      __selectableOptionFromFlag("Segmentation", scene->flags[mjRND_SEGMENT]);
+      __selectableOptionFromFlag("Skybox", scene->flags[mjRND_SKYBOX]);
+
+      if ( ImGui::MenuItem( "Disabled option", "[No shortcut]", false, false ) ) {
+      } // Disabled item
       ImGui::Separator();
-      if (ImGui::MenuItem("Do nothing", "CTRL+X")) {}
+      if ( ImGui::MenuItem( "Do nothing", "CTRL+X" ) ) {
+      }
+
       ImGui::EndMenu();
     }
+
+    if ( ImGui::BeginMenu( "Visualization" ) ) {
+      __selectableOptionFromFlag("Actuator", option->flags[mjVIS_ACTUATOR]);
+      __selectableOptionFromFlag("Joint", option->flags[mjVIS_JOINT]);
+      __selectableOptionFromFlag("Contact Point", option->flags[mjVIS_CONTACTPOINT]);
+      __selectableOptionFromFlag("Contact Force", option->flags[mjVIS_CONTACTFORCE]);
+      __selectableOptionFromFlag("Constraints", option->flags[mjVIS_CONSTRAINT]);
+      __selectableOptionFromFlag("Center of Mass", option->flags[mjVIS_COM]);
+      __selectableOptionFromFlag("Inertia", option->flags[mjVIS_INERTIA]);
+      __selectableOptionFromFlag("Scaled Inertia Boxes", option->flags[mjVIS_SCLINERTIA]);
+      __selectableOptionFromFlag("Perturbation Force", option->flags[mjVIS_PERTFORCE]);
+      __selectableOptionFromFlag("Body BVH", option->flags[mjVIS_BODYBVH]);
+      __selectableOptionFromFlag("Mesh BVH", option->flags[mjVIS_MESHBVH]);
+
+      ImGui::EndMenu();
+    }
+
     ImGui::EndMainMenuBar();
   }
 }

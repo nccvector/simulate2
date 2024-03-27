@@ -92,7 +92,7 @@ void _createSceneDropdown() {
   ImGui::ListBox( "Select scene", &currentItem, items, paths.size(), 10 );
   ImGui::PopItemWidth();
 
-  if ( ImGui::Button( "Load" ) ) {
+  if ( ImGui::Button( "Load", { -1, 30 } ) ) {
     std::cout << "Destroying current scene...\n";
     Simulation::unloadScene(); // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
 
@@ -228,7 +228,7 @@ void _createControlPanel( mjModel* model, mjData* data ) {
     // Get current control
     controlValues[i] = data->ctrl[i];
 
-    ImGui::SliderFloat( fmt::format( "ctrl[{0}] ", i ).c_str(), &controlValues[i], -10.0f, 10.0f, "%.3f" );
+    ImGui::DragFloat( fmt::format( "ctrl[{0}] ", i ).c_str(), &controlValues[i], 0.01f, -2.0f, 2.0f, "%.3f" );
 
     // Apply modified control
     data->ctrl[i] = controlValues[i];
@@ -242,9 +242,19 @@ void __selectableOptionFromFlag( const char* name, mjtByte& flag ) {
 
   selectStates[name] = flag;
 
-  if ( ImGui::Checkbox( name, &selectStates[name] ) ) {
+  ImGui::PushStyleColor(ImGuiCol_Header, {0, 0, 0, 0});
+  if ( ImGui::Selectable( name, &selectStates[name] ) ) {
     flag = selectStates[name];
   }
+  ImGui::PopStyleColor();
+  ImGui::SameLine();
+  ImGui::Text( "\t\t\t\t" );
+  ImGui::SameLine( ImGui::GetWindowWidth() - 30 );
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
+  ImGui::PushStyleColor(ImGuiCol_FrameBg, {0, 0, 0, 0});
+  ImGui::Checkbox("##", &selectStates[name]);
+  ImGui::PopStyleColor();
+  ImGui::PopStyleVar();
 }
 
 void _createMenuBar( mjvScene* scene, mjvOption* option ) {
@@ -292,57 +302,77 @@ void _createMenuBar( mjvScene* scene, mjvOption* option ) {
 
 
 void _applyDarkTheme() {
+  ImColor text         = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
+  ImColor textDisabled = ImVec4( 1.0f, 1.0f, 1.0f, 0.5f );
+
+  //  // Blue scent
+  //  ImColor scent       = ImVec4( 42.0f / 255.0f, 0.0f / 255.0f, 164.0f / 255.0f, 1.0f );
+  //  ImColor scentActive       = ImVec4( 0.0f / 255.0f, 163.0f / 255.0f, 255.0f / 255.0f, 1.0f );
+  //  ImColor secondScent = scent;
+
+  // Warm scent
+  ImColor scent       = ImVec4( 191.0f / 255.0f, 31.0f / 255.0f, 31.0f / 255.0f, 1.0f );
+  ImColor scentActive = ImVec4( 217.0f / 255.0f, 83.0f / 255.0f, 35.0f / 255.0f, 1.0f );
+  ImColor secondScent = scent;
+
+  ImColor bg     = ImVec4( 0.10f, 0.10f, 0.10f, 1.00f );
+  ImColor bgDark = ImVec4( 0.0f, 0.0f, 0.0f, 1.00f );
+  ImColor hover  = scentActive;
+
+  ImColor border = ImVec4( 0.1f, 0.1f, 0.1f, 1.0f );
+  ImColor shadow = ImVec4( 0.0f, 0.0f, 0.0f, 1.0f );
+
   ImVec4* colors                         = ImGui::GetStyle().Colors;
-  colors[ImGuiCol_Text]                  = ImVec4( 1.00f, 1.00f, 1.00f, 1.00f );
-  colors[ImGuiCol_TextDisabled]          = ImVec4( 0.50f, 0.50f, 0.50f, 1.00f );
-  colors[ImGuiCol_WindowBg]              = ImVec4( 0.10f, 0.10f, 0.10f, 1.00f );
-  colors[ImGuiCol_ChildBg]               = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
-  colors[ImGuiCol_PopupBg]               = ImVec4( 0.19f, 0.19f, 0.19f, 0.92f );
-  colors[ImGuiCol_Border]                = ImVec4( 0.19f, 0.19f, 0.19f, 0.29f );
-  colors[ImGuiCol_BorderShadow]          = ImVec4( 0.00f, 0.00f, 0.00f, 0.24f );
-  colors[ImGuiCol_FrameBg]               = ImVec4( 0.05f, 0.05f, 0.05f, 0.54f );
-  colors[ImGuiCol_FrameBgHovered]        = ImVec4( 0.19f, 0.19f, 0.19f, 0.54f );
-  colors[ImGuiCol_FrameBgActive]         = ImVec4( 0.20f, 0.22f, 0.23f, 1.00f );
-  colors[ImGuiCol_TitleBg]               = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
-  colors[ImGuiCol_TitleBgActive]         = ImVec4( 0.06f, 0.06f, 0.06f, 1.00f );
-  colors[ImGuiCol_TitleBgCollapsed]      = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
-  colors[ImGuiCol_MenuBarBg]             = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
-  colors[ImGuiCol_ScrollbarBg]           = ImVec4( 0.05f, 0.05f, 0.05f, 0.54f );
-  colors[ImGuiCol_ScrollbarGrab]         = ImVec4( 0.34f, 0.34f, 0.34f, 0.54f );
-  colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4( 0.40f, 0.40f, 0.40f, 0.54f );
-  colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4( 0.56f, 0.56f, 0.56f, 0.54f );
-  colors[ImGuiCol_CheckMark]             = ImVec4( 0.33f, 0.67f, 0.86f, 1.00f );
-  colors[ImGuiCol_SliderGrab]            = ImVec4( 0.34f, 0.34f, 0.34f, 0.54f );
-  colors[ImGuiCol_SliderGrabActive]      = ImVec4( 0.56f, 0.56f, 0.56f, 0.54f );
-  colors[ImGuiCol_Button]                = ImVec4( 0.05f, 0.05f, 0.05f, 0.54f );
-  colors[ImGuiCol_ButtonHovered]         = ImVec4( 0.19f, 0.19f, 0.19f, 0.54f );
-  colors[ImGuiCol_ButtonActive]          = ImVec4( 0.20f, 0.22f, 0.23f, 1.00f );
-  colors[ImGuiCol_Header]                = ImVec4( 0.00f, 0.00f, 0.00f, 0.52f );
-  colors[ImGuiCol_HeaderHovered]         = ImVec4( 0.00f, 0.00f, 0.00f, 0.36f );
-  colors[ImGuiCol_HeaderActive]          = ImVec4( 0.20f, 0.22f, 0.23f, 0.33f );
-  colors[ImGuiCol_Separator]             = ImVec4( 0.28f, 0.28f, 0.28f, 0.29f );
-  colors[ImGuiCol_SeparatorHovered]      = ImVec4( 0.44f, 0.44f, 0.44f, 0.29f );
-  colors[ImGuiCol_SeparatorActive]       = ImVec4( 0.40f, 0.44f, 0.47f, 1.00f );
-  colors[ImGuiCol_ResizeGrip]            = ImVec4( 0.28f, 0.28f, 0.28f, 0.29f );
-  colors[ImGuiCol_ResizeGripHovered]     = ImVec4( 0.44f, 0.44f, 0.44f, 0.29f );
-  colors[ImGuiCol_ResizeGripActive]      = ImVec4( 0.40f, 0.44f, 0.47f, 1.00f );
-  colors[ImGuiCol_Tab]                   = ImVec4( 0.00f, 0.00f, 0.00f, 0.52f );
-  colors[ImGuiCol_TabHovered]            = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
-  colors[ImGuiCol_TabActive]             = ImVec4( 0.20f, 0.20f, 0.20f, 0.36f );
-  colors[ImGuiCol_TabUnfocused]          = ImVec4( 0.00f, 0.00f, 0.00f, 0.52f );
-  colors[ImGuiCol_TabUnfocusedActive]    = ImVec4( 0.14f, 0.14f, 0.14f, 1.00f );
+  colors[ImGuiCol_Text]                  = text;
+  colors[ImGuiCol_TextDisabled]          = textDisabled;
+  colors[ImGuiCol_WindowBg]              = bg;
+  colors[ImGuiCol_ChildBg]               = bgDark;
+  colors[ImGuiCol_PopupBg]               = bg;
+  colors[ImGuiCol_Border]                = border;
+  colors[ImGuiCol_BorderShadow]          = shadow;
+  colors[ImGuiCol_FrameBg]               = bg;
+  colors[ImGuiCol_FrameBgHovered]        = hover;
+  colors[ImGuiCol_FrameBgActive]         = scent;
+  colors[ImGuiCol_TitleBg]               = bgDark;
+  colors[ImGuiCol_TitleBgActive]         = scent;
+  colors[ImGuiCol_TitleBgCollapsed]      = scent;
+  colors[ImGuiCol_MenuBarBg]             = bg;
+  colors[ImGuiCol_ScrollbarBg]           = bgDark;
+  colors[ImGuiCol_ScrollbarGrab]         = scent;
+  colors[ImGuiCol_ScrollbarGrabHovered]  = hover;
+  colors[ImGuiCol_ScrollbarGrabActive]   = scentActive;
+  colors[ImGuiCol_CheckMark]             = scent;
+  colors[ImGuiCol_SliderGrab]            = scent;
+  colors[ImGuiCol_SliderGrabActive]      = scentActive;
+  colors[ImGuiCol_Button]                = scent;
+  colors[ImGuiCol_ButtonHovered]         = hover;
+  colors[ImGuiCol_ButtonActive]          = scentActive;
+  colors[ImGuiCol_Header]                = secondScent;
+  colors[ImGuiCol_HeaderHovered]         = hover;
+  colors[ImGuiCol_HeaderActive]          = scent;
+  colors[ImGuiCol_Separator]             = scent;
+  colors[ImGuiCol_SeparatorHovered]      = hover;
+  colors[ImGuiCol_SeparatorActive]       = scent;
+  colors[ImGuiCol_ResizeGrip]            = scent;
+  colors[ImGuiCol_ResizeGripHovered]     = hover;
+  colors[ImGuiCol_ResizeGripActive]      = scentActive;
+  colors[ImGuiCol_Tab]                   = scent;
+  colors[ImGuiCol_TabHovered]            = hover;
+  colors[ImGuiCol_TabActive]             = scent;
+  colors[ImGuiCol_TabUnfocused]          = secondScent;
+  colors[ImGuiCol_TabUnfocusedActive]    = scent;
   colors[ImGuiCol_DockingPreview]        = ImVec4( 0.33f, 0.67f, 0.86f, 1.00f );
   colors[ImGuiCol_DockingEmptyBg]        = ImVec4( 1.00f, 0.00f, 0.00f, 1.00f );
-  colors[ImGuiCol_PlotLines]             = ImVec4( 1.00f, 0.00f, 0.00f, 1.00f );
-  colors[ImGuiCol_PlotLinesHovered]      = ImVec4( 1.00f, 0.00f, 0.00f, 1.00f );
+  colors[ImGuiCol_PlotLines]             = scent;
+  colors[ImGuiCol_PlotLinesHovered]      = hover;
   colors[ImGuiCol_PlotHistogram]         = ImVec4( 1.00f, 0.00f, 0.00f, 1.00f );
-  colors[ImGuiCol_PlotHistogramHovered]  = ImVec4( 1.00f, 0.00f, 0.00f, 1.00f );
-  colors[ImGuiCol_TableHeaderBg]         = ImVec4( 0.00f, 0.00f, 0.00f, 0.52f );
-  colors[ImGuiCol_TableBorderStrong]     = ImVec4( 0.00f, 0.00f, 0.00f, 0.52f );
-  colors[ImGuiCol_TableBorderLight]      = ImVec4( 0.28f, 0.28f, 0.28f, 0.29f );
-  colors[ImGuiCol_TableRowBg]            = ImVec4( 0.00f, 0.00f, 0.00f, 0.00f );
-  colors[ImGuiCol_TableRowBgAlt]         = ImVec4( 1.00f, 1.00f, 1.00f, 0.06f );
-  colors[ImGuiCol_TextSelectedBg]        = ImVec4( 0.20f, 0.22f, 0.23f, 1.00f );
+  colors[ImGuiCol_PlotHistogramHovered]  = hover;
+  colors[ImGuiCol_TableHeaderBg]         = bg;
+  colors[ImGuiCol_TableBorderStrong]     = border;
+  colors[ImGuiCol_TableBorderLight]      = shadow;
+  colors[ImGuiCol_TableRowBg]            = bg;
+  colors[ImGuiCol_TableRowBgAlt]         = bgDark;
+  colors[ImGuiCol_TextSelectedBg]        = hover;
   colors[ImGuiCol_DragDropTarget]        = ImVec4( 0.33f, 0.67f, 0.86f, 1.00f );
   colors[ImGuiCol_NavHighlight]          = ImVec4( 1.00f, 0.00f, 0.00f, 1.00f );
   colors[ImGuiCol_NavWindowingHighlight] = ImVec4( 1.00f, 0.00f, 0.00f, 0.70f );
@@ -363,7 +393,7 @@ void _applyDarkTheme() {
   style.ChildBorderSize   = 1;
   style.PopupBorderSize   = 1;
   style.FrameBorderSize   = 1;
-  style.TabBorderSize     = 1;
+  style.TabBorderSize     = 0;
   style.WindowRounding    = 7;
   style.ChildRounding     = 4;
   style.FrameRounding     = 3;

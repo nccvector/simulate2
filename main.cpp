@@ -20,7 +20,7 @@ void initializeWindow() {
   }
 
   // create window, make OpenGL context current, request v-sync
-  window = glfwCreateWindow( 1200, 900, "Demo", NULL, NULL );
+  window = glfwCreateWindow( 1200, 900, "Simulate 2.0", NULL, NULL );
   glfwMakeContextCurrent( window );
   glfwSwapInterval( 1 );
 }
@@ -62,7 +62,7 @@ int main() {
   initializeWindow();
   Gui::init( window );
 
-  Simulation::loadScene("resources/ugv.xml");
+  Simulation::loadScene( "resources/ugv.xml" );
 
   // run main loop, target real-time simulation and 60 fps rendering
   while ( !glfwWindowShouldClose( window ) ) {

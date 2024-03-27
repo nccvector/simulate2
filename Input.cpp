@@ -9,18 +9,18 @@ namespace Input {
 
 const double vrZoomSpeed = 0.025;
 
-double vrMousePosX = 0;
-double vrMousePosY = 0;
-double vrMousePreviousX = 0;
-double vrMousePreviousY = 0;
-double vrMouseDeltaX = 0;
-double vrMouseDeltaY = 0;
-double vrMouseDeltaXNorm = 0;
-double vrMouseDeltaYNorm = 0;
+double vrMousePosX         = 0;
+double vrMousePosY         = 0;
+double vrMousePreviousX    = 0;
+double vrMousePreviousY    = 0;
+double vrMouseDeltaX       = 0;
+double vrMouseDeltaY       = 0;
+double vrMouseDeltaXNorm   = 0;
+double vrMouseDeltaYNorm   = 0;
 double vrMouseScrollDeltaX = 0;
 double vrMouseScrollDeltaY = 0;
 
-int vrWindowWidth = 0;
+int vrWindowWidth  = 0;
 int vrWindowHeight = 0;
 
 

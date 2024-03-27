@@ -237,12 +237,12 @@ void _createControlPanel( mjModel* model, mjData* data ) {
   ImGui::End();
 }
 
-void __selectableOptionFromFlag(const char* name, mjtByte& flag){
+void __selectableOptionFromFlag( const char* name, mjtByte& flag ) {
   static std::map<std::string, bool> selectStates;
 
   selectStates[name] = flag;
 
-  if ( ImGui::Checkbox( name, &selectStates[name]) ) {
+  if ( ImGui::Checkbox( name, &selectStates[name] ) ) {
     flag = selectStates[name];
   }
 }
@@ -255,11 +255,11 @@ void _createMenuBar( mjvScene* scene, mjvOption* option ) {
     }
 
     if ( ImGui::BeginMenu( "Rendering" ) ) {
-      __selectableOptionFromFlag("Wireframe", scene->flags[mjRND_WIREFRAME]);
-      __selectableOptionFromFlag("Shadows", scene->flags[mjRND_SHADOW]);
-      __selectableOptionFromFlag("Reflection", scene->flags[mjRND_REFLECTION]);
-      __selectableOptionFromFlag("Segmentation", scene->flags[mjRND_SEGMENT]);
-      __selectableOptionFromFlag("Skybox", scene->flags[mjRND_SKYBOX]);
+      __selectableOptionFromFlag( "Wireframe", scene->flags[mjRND_WIREFRAME] );
+      __selectableOptionFromFlag( "Shadows", scene->flags[mjRND_SHADOW] );
+      __selectableOptionFromFlag( "Reflection", scene->flags[mjRND_REFLECTION] );
+      __selectableOptionFromFlag( "Segmentation", scene->flags[mjRND_SEGMENT] );
+      __selectableOptionFromFlag( "Skybox", scene->flags[mjRND_SKYBOX] );
 
       if ( ImGui::MenuItem( "Disabled option", "[No shortcut]", false, false ) ) {
       } // Disabled item
@@ -271,17 +271,17 @@ void _createMenuBar( mjvScene* scene, mjvOption* option ) {
     }
 
     if ( ImGui::BeginMenu( "Visualization" ) ) {
-      __selectableOptionFromFlag("Actuator", option->flags[mjVIS_ACTUATOR]);
-      __selectableOptionFromFlag("Joint", option->flags[mjVIS_JOINT]);
-      __selectableOptionFromFlag("Contact Point", option->flags[mjVIS_CONTACTPOINT]);
-      __selectableOptionFromFlag("Contact Force", option->flags[mjVIS_CONTACTFORCE]);
-      __selectableOptionFromFlag("Constraints", option->flags[mjVIS_CONSTRAINT]);
-      __selectableOptionFromFlag("Center of Mass", option->flags[mjVIS_COM]);
-      __selectableOptionFromFlag("Inertia", option->flags[mjVIS_INERTIA]);
-      __selectableOptionFromFlag("Scaled Inertia Boxes", option->flags[mjVIS_SCLINERTIA]);
-      __selectableOptionFromFlag("Perturbation Force", option->flags[mjVIS_PERTFORCE]);
-      __selectableOptionFromFlag("Body BVH", option->flags[mjVIS_BODYBVH]);
-      __selectableOptionFromFlag("Mesh BVH", option->flags[mjVIS_MESHBVH]);
+      __selectableOptionFromFlag( "Actuator", option->flags[mjVIS_ACTUATOR] );
+      __selectableOptionFromFlag( "Joint", option->flags[mjVIS_JOINT] );
+      __selectableOptionFromFlag( "Contact Point", option->flags[mjVIS_CONTACTPOINT] );
+      __selectableOptionFromFlag( "Contact Force", option->flags[mjVIS_CONTACTFORCE] );
+      __selectableOptionFromFlag( "Constraints", option->flags[mjVIS_CONSTRAINT] );
+      __selectableOptionFromFlag( "Center of Mass", option->flags[mjVIS_COM] );
+      __selectableOptionFromFlag( "Inertia", option->flags[mjVIS_INERTIA] );
+      __selectableOptionFromFlag( "Scaled Inertia Boxes", option->flags[mjVIS_SCLINERTIA] );
+      __selectableOptionFromFlag( "Perturbation Force", option->flags[mjVIS_PERTFORCE] );
+      __selectableOptionFromFlag( "Body BVH", option->flags[mjVIS_BODYBVH] );
+      __selectableOptionFromFlag( "Mesh BVH", option->flags[mjVIS_MESHBVH] );
 
       ImGui::EndMenu();
     }

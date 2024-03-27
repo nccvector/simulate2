@@ -15,7 +15,7 @@ mjvOption opt;  // visualization options
 mjvScene scene; // abstract scene
 mjrContext con; // custom GPU context
 
-void loadScene(const char* path) {
+void loadScene( const char* path ) {
   const int errBufferLen = 1000;
   char err[errBufferLen];
   model = mj_loadXML( path, NULL, err, errBufferLen );

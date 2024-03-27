@@ -13,8 +13,6 @@
 
 #include <map>
 #include <iostream>
-#include <thread>
-#include <chrono>
 #include <glob.h>   // glob(), globfree()
 #include <string.h> // memset()
 #include <vector>
@@ -66,7 +64,9 @@ std::vector<std::string> getMujocoMenagerieScenePaths() {
 namespace Gui {
 
 const float applicationFontSize = 18;
-ImFont* font;
+const float consoleFontSize     = 18;
+ImFont* applicationFont;
+ImFont* consoleFont;
 
 
 void _loadFonts();
@@ -111,7 +111,7 @@ void render( mjModel* model, mjData* data ) {
   // Set theme
   _applyDarkTheme();
 
-  ImGui::PushFont( font );
+  ImGui::PushFont( applicationFont );
 
   // Will allow windows to be docked
   _configureAndSubmitDockspace();
@@ -163,7 +163,8 @@ void _loadFonts() {
   io.Fonts->AddFontDefault();
 
   // Load custom font
-  font = io.Fonts->AddFontFromFileTTF( "resources/fonts/Roboto-Regular.ttf", applicationFontSize );
+  applicationFont = io.Fonts->AddFontFromFileTTF( "resources/fonts/Roboto-Regular.ttf", applicationFontSize );
+  consoleFont     = io.Fonts->AddFontFromFileTTF( "resources/fonts/FiraCode-Regular.ttf", applicationFontSize );
 }
 
 void _configureAndSubmitDockspace() {
@@ -213,9 +214,28 @@ void _createStatePanel( mjModel* model, mjData* data ) {
 
   ImGui::Begin( "State" );
   for ( int i = 0; i < numDOFs; i++ ) {
-    ImGui::Text( fmt::format( "q[{0}]: {1}", i, data->qpos[i] ).c_str() );
-  }
+    ImGui::Text( fmt::format( "q[{0}]: ", i ).c_str() );
 
+    float windowWidth      = ImGui::GetWindowWidth();
+    float itemWidth        = windowWidth * 0.7;
+    float itemPaddingRight = 20;
+
+    ImGui::SameLine( windowWidth - itemWidth - itemPaddingRight );
+
+    ImGui::PushItemWidth( itemWidth );
+
+    ImGui::PushFont( consoleFont );
+    ImGui::PushStyleColor( ImGuiCol_Text, { 1.0, 1.0, 1.0, 0.7 } );
+    ImGui::PushStyleColor( ImGuiCol_FrameBgHovered, { 0.0, 0.0, 0.0, 1.0 } );
+    ImGui::PushStyleColor( ImGuiCol_FrameBgActive, { 0.0, 0.0, 0.0, 1.0 } );
+    float val = data->qpos[i];
+    ImGui::DragFloat( fmt::format( "##q[{0}]: ", i ).c_str(), &val, 0.0000001f, -1000000.0f, 1000000.0f, "%.4f",
+        ImGuiSliderFlags_NoInput );
+    ImGui::PopStyleColor( 3 );
+    ImGui::PopFont();
+
+    ImGui::PopItemWidth();
+  }
   ImGui::End();
 }
 
@@ -228,7 +248,21 @@ void _createControlPanel( mjModel* model, mjData* data ) {
     // Get current control
     controlValues[i] = data->ctrl[i];
 
-    ImGui::DragFloat( fmt::format( "ctrl[{0}] ", i ).c_str(), &controlValues[i], 0.01f, -2.0f, 2.0f, "%.3f" );
+    ImGui::Text( fmt::format( "Control[{0}]: ", i ).c_str() );
+
+    float windowWidth      = ImGui::GetWindowWidth();
+    float itemWidth        = windowWidth * 0.6;
+    float itemPaddingRight = 20;
+
+    ImGui::SameLine( windowWidth - itemWidth - itemPaddingRight );
+
+    ImGui::PushItemWidth( itemWidth );
+
+    ImGui::PushFont( consoleFont );
+    ImGui::DragFloat( fmt::format( "##ctrl[{0}]", i ).c_str(), &controlValues[i], 0.01f, -2.0f, 2.0f, "%.2f" );
+    ImGui::PopFont();
+
+    ImGui::PopItemWidth();
 
     // Apply modified control
     data->ctrl[i] = controlValues[i];
@@ -242,7 +276,7 @@ void __selectableOptionFromFlag( const char* name, mjtByte& flag ) {
 
   selectStates[name] = flag;
 
-  ImGui::PushStyleColor(ImGuiCol_Header, {0, 0, 0, 0});
+  ImGui::PushStyleColor( ImGuiCol_Header, { 0, 0, 0, 0 } );
   if ( ImGui::Selectable( name, &selectStates[name] ) ) {
     flag = selectStates[name];
   }
@@ -250,9 +284,9 @@ void __selectableOptionFromFlag( const char* name, mjtByte& flag ) {
   ImGui::SameLine();
   ImGui::Text( "\t\t\t\t" );
   ImGui::SameLine( ImGui::GetWindowWidth() - 30 );
-  ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
-  ImGui::PushStyleColor(ImGuiCol_FrameBg, {0, 0, 0, 0});
-  ImGui::Checkbox("##", &selectStates[name]);
+  ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, 0 );
+  ImGui::PushStyleColor( ImGuiCol_FrameBg, { 0, 0, 0, 0 } );
+  ImGui::Checkbox( "##", &selectStates[name] );
   ImGui::PopStyleColor();
   ImGui::PopStyleVar();
 }
@@ -330,7 +364,7 @@ void _applyDarkTheme() {
   colors[ImGuiCol_PopupBg]               = bg;
   colors[ImGuiCol_Border]                = border;
   colors[ImGuiCol_BorderShadow]          = shadow;
-  colors[ImGuiCol_FrameBg]               = bg;
+  colors[ImGuiCol_FrameBg]               = bgDark;
   colors[ImGuiCol_FrameBgHovered]        = hover;
   colors[ImGuiCol_FrameBgActive]         = scent;
   colors[ImGuiCol_TitleBg]               = bgDark;
@@ -379,6 +413,10 @@ void _applyDarkTheme() {
   colors[ImGuiCol_NavWindowingDimBg]     = ImVec4( 1.00f, 0.00f, 0.00f, 0.20f );
   colors[ImGuiCol_ModalWindowDimBg]      = ImVec4( 1.00f, 0.00f, 0.00f, 0.35f );
 
+  int scentRounding = 1;
+  int noRounding    = 0;
+  int maxRounding   = 5;
+
   ImGuiStyle& style       = ImGui::GetStyle();
   style.WindowPadding     = ImVec2( 8.00f, 8.00f );
   style.FramePadding      = ImVec2( 5.00f, 2.00f );
@@ -387,21 +425,21 @@ void _applyDarkTheme() {
   style.ItemInnerSpacing  = ImVec2( 6.00f, 6.00f );
   style.TouchExtraPadding = ImVec2( 0.00f, 0.00f );
   style.IndentSpacing     = 25;
-  style.ScrollbarSize     = 15;
+  style.ScrollbarSize     = 5;
   style.GrabMinSize       = 10;
-  style.WindowBorderSize  = 1;
+  style.WindowBorderSize  = 0;
   style.ChildBorderSize   = 1;
   style.PopupBorderSize   = 1;
-  style.FrameBorderSize   = 1;
+  style.FrameBorderSize   = 0;
   style.TabBorderSize     = 0;
-  style.WindowRounding    = 7;
-  style.ChildRounding     = 4;
-  style.FrameRounding     = 3;
-  style.PopupRounding     = 4;
-  style.ScrollbarRounding = 9;
-  style.GrabRounding      = 3;
+  style.WindowRounding    = maxRounding;
+  style.ChildRounding     = maxRounding;
+  style.FrameRounding     = scentRounding;
+  style.PopupRounding     = noRounding;
+  style.ScrollbarRounding = noRounding;
+  style.GrabRounding      = scentRounding;
+  style.TabRounding       = scentRounding;
   style.LogSliderDeadzone = 4;
-  style.TabRounding       = 1;
 }
 
 } // namespace Gui

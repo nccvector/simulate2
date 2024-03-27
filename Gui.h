@@ -13,7 +13,9 @@
 namespace Gui {
 
 extern const float applicationFontSize;
-extern ImFont* font;
+extern const float consoleFontSize;
+extern ImFont* applicationFont;
+extern ImFont* consoleFont;
 
 void init( GLFWwindow* window );
 void destroy();

@@ -18,6 +18,15 @@
 #include <vector>
 #include <string>
 
+using namespace ImGui;
+
+const float _applicationFontSize = 18;
+const float _consoleFontSize     = 18;
+ImFont* _applicationFont;
+ImFont* _applicationFontBold;
+ImFont* _consoleFont;
+ImFont* _consoleFontBold;
+
 std::vector<std::string> glob( const std::string& pattern ) {
   using namespace std;
 
@@ -63,11 +72,6 @@ std::vector<std::string> getMujocoMenagerieScenePaths() {
 
 namespace Gui {
 
-const float applicationFontSize = 18;
-const float consoleFontSize     = 18;
-ImFont* applicationFont;
-ImFont* consoleFont;
-
 
 void _loadFonts();
 void _applyDarkTheme();
@@ -77,7 +81,7 @@ void _createStatePanel( mjModel* model, mjData* data );
 void _createControlPanel( mjModel* model, mjData* data );
 void _createSceneDropdown() {
 
-  ImGui::Begin( "Select scene" );
+  Begin( "Select scene" );
 
   // Only load once
   static std::vector<std::string> paths = getMujocoMenagerieScenePaths();
@@ -88,11 +92,11 @@ void _createSceneDropdown() {
   }
   static int currentItem = 0;
 
-  ImGui::PushItemWidth( -1 );
-  ImGui::ListBox( "Select scene", &currentItem, items, paths.size(), 10 );
-  ImGui::PopItemWidth();
+  PushItemWidth( -1 );
+  ListBox( "Select scene", &currentItem, items, paths.size(), 10 );
+  PopItemWidth();
 
-  if ( ImGui::Button( "Load", { -1, 30 } ) ) {
+  if ( Button( "Load", { -1, 30 } ) ) {
     std::cout << "Destroying current scene...\n";
     Simulation::unloadScene(); // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
 
@@ -101,17 +105,17 @@ void _createSceneDropdown() {
         items[currentItem] ); // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
   }
 
-  ImGui::End();
+  End();
 }
 
 
 void render( mjModel* model, mjData* data ) {
-  ImGui::NewFrame();
+  NewFrame();
 
   // Set theme
   _applyDarkTheme();
 
-  ImGui::PushFont( applicationFont );
+  PushFont( _applicationFont );
 
   // Will allow windows to be docked
   _configureAndSubmitDockspace();
@@ -125,18 +129,18 @@ void render( mjModel* model, mjData* data ) {
   // A correct fix would be to call updatesim after loading new scene
   _createSceneDropdown();
 
-  ImGui::ShowDemoWindow( nullptr );
+  ShowDemoWindow( nullptr );
 
-  ImGui::PopFont();
+  PopFont();
 
-  ImGui::Render();
-  ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
+  Render();
+  ImGui_ImplOpenGL3_RenderDrawData( GetDrawData() );
 }
 
 void init( GLFWwindow* window ) {
 
-  ImGui::CreateContext();
-  ImGui::StyleColorsDark();
+  CreateContext();
+  StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL( window, true );
   ImGui_ImplOpenGL3_Init( "#version 330" );
 
@@ -146,7 +150,7 @@ void init( GLFWwindow* window ) {
   ImGui_ImplGlfw_NewFrame();
 
   // Enable docking
-  ImGuiIO& io = ImGui::GetIO();
+  ImGuiIO& io = GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
@@ -154,38 +158,40 @@ void destroy() {
   // Destroy GUI
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
+  DestroyContext();
 }
 
 void _loadFonts() {
   // Load default font
-  ImGuiIO& io = ImGui::GetIO();
+  ImGuiIO& io = GetIO();
   io.Fonts->AddFontDefault();
 
   // Load custom font
-  applicationFont = io.Fonts->AddFontFromFileTTF( "resources/fonts/Roboto-Regular.ttf", applicationFontSize );
-  consoleFont     = io.Fonts->AddFontFromFileTTF( "resources/fonts/FiraCode-Regular.ttf", applicationFontSize );
+  _applicationFont     = io.Fonts->AddFontFromFileTTF( "resources/fonts/Roboto-Regular.ttf", _applicationFontSize );
+  _applicationFontBold = io.Fonts->AddFontFromFileTTF( "resources/fonts/Roboto-Medium.ttf", _applicationFontSize );
+  _consoleFont         = io.Fonts->AddFontFromFileTTF( "resources/fonts/FiraCode-Regular.ttf", _consoleFontSize );
+  _consoleFontBold     = io.Fonts->AddFontFromFileTTF( "resources/fonts/FiraCode-SemiBold.ttf", _consoleFontSize );
 }
 
 void _configureAndSubmitDockspace() {
-  ImGuiIO& io                               = ImGui::GetIO();
+  ImGuiIO& io                               = GetIO();
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
 
   // Viewport resizing on window size change
-  ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGuiViewport* viewport = GetMainViewport();
   viewport->Size          = { (float) Input::vrWindowWidth, (float) Input::vrWindowHeight };
   viewport->WorkSize      = { (float) Input::vrWindowWidth, (float) Input::vrWindowHeight };
   viewport->Flags |= ( viewport->Flags & ImGuiViewportFlags_IsMinimized ); // Preserve existing flags
 
   // Set dockspace window position and size based on viewport
-  ImGui::SetNextWindowPos( viewport->WorkPos );
-  ImGui::SetNextWindowSize( viewport->WorkSize );
-  ImGui::SetNextWindowViewport( viewport->ID );
+  SetNextWindowPos( viewport->WorkPos );
+  SetNextWindowSize( viewport->WorkSize );
+  SetNextWindowViewport( viewport->ID );
 
   // Set dockspace window style (no border, no padding, no rounding yata yata)
-  ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
-  ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.0f );
-  ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
+  PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
+  PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.0f );
+  PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0.0f, 0.0f ) );
 
   // Set dockspace window flags (menu bar, no back ground etc)
   ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
@@ -198,77 +204,81 @@ void _configureAndSubmitDockspace() {
   windowFlags |= ImGuiWindowFlags_NoBackground;
 
   bool p;
-  ImGui::Begin( "DockSpace", &p, windowFlags );
+  Begin( "DockSpace", &p, windowFlags );
 
   // Submit dockspace inside a window
-  ImGuiID dockspace_id = ImGui::GetID( "MyDockSpace" );
-  ImGui::DockSpace( dockspace_id, ImVec2( 0.0f, 0.0f ), dockspace_flags );
+  ImGuiID dockspace_id = GetID( "MyDockSpace" );
+  DockSpace( dockspace_id, ImVec2( 0.0f, 0.0f ), dockspace_flags );
 
-  ImGui::End();
+  End();
 
-  ImGui::PopStyleVar( 3 );
+  PopStyleVar( 3 );
 }
 
 void _createStatePanel( mjModel* model, mjData* data ) {
   int numDOFs = model->nq;
 
-  ImGui::Begin( "State" );
+  Begin( "State" );
   for ( int i = 0; i < numDOFs; i++ ) {
-    ImGui::Text( fmt::format( "q[{0}]: ", i ).c_str() );
+    PushFont(_applicationFontBold);
+    Text( fmt::format( "q[{0}]: ", i ).c_str() );
+    PopFont();
 
-    float windowWidth      = ImGui::GetWindowWidth();
+    float windowWidth      = GetWindowWidth();
     float itemWidth        = windowWidth * 0.7;
     float itemPaddingRight = 20;
 
-    ImGui::SameLine( windowWidth - itemWidth - itemPaddingRight );
+    SameLine( windowWidth - itemWidth - itemPaddingRight );
 
-    ImGui::PushItemWidth( itemWidth );
+    PushItemWidth( itemWidth );
 
-    ImGui::PushFont( consoleFont );
-    ImGui::PushStyleColor( ImGuiCol_Text, { 1.0, 1.0, 1.0, 0.7 } );
-    ImGui::PushStyleColor( ImGuiCol_FrameBgHovered, { 0.0, 0.0, 0.0, 1.0 } );
-    ImGui::PushStyleColor( ImGuiCol_FrameBgActive, { 0.0, 0.0, 0.0, 1.0 } );
+    PushFont( _consoleFont );
+    PushStyleColor( ImGuiCol_Text, { 1.0, 1.0, 1.0, 0.7 } );
+    PushStyleColor( ImGuiCol_FrameBgHovered, { 0.0, 0.0, 0.0, 1.0 } );
+    PushStyleColor( ImGuiCol_FrameBgActive, { 0.0, 0.0, 0.0, 1.0 } );
     float val = data->qpos[i];
-    ImGui::DragFloat( fmt::format( "##q[{0}]: ", i ).c_str(), &val, 0.0000001f, -1000000.0f, 1000000.0f, "%.4f",
+    DragFloat( fmt::format( "##q[{0}]: ", i ).c_str(), &val, 0.0000001f, -1000000.0f, 1000000.0f, "%.4f",
         ImGuiSliderFlags_NoInput );
-    ImGui::PopStyleColor( 3 );
-    ImGui::PopFont();
+    PopStyleColor( 3 );
+    PopFont();
 
-    ImGui::PopItemWidth();
+    PopItemWidth();
   }
-  ImGui::End();
+  End();
 }
 
 void _createControlPanel( mjModel* model, mjData* data ) {
   const int numDOFs = model->nu;
   float controlValues[numDOFs];
 
-  ImGui::Begin( "Control" );
+  Begin( "Control" );
   for ( int i = 0; i < numDOFs; i++ ) {
     // Get current control
     controlValues[i] = data->ctrl[i];
 
-    ImGui::Text( fmt::format( "Control[{0}]: ", i ).c_str() );
+    PushFont(_applicationFontBold);
+    Text( fmt::format( "Control[{0}]: ", i ).c_str() );
+    PopFont();
 
-    float windowWidth      = ImGui::GetWindowWidth();
+    float windowWidth      = GetWindowWidth();
     float itemWidth        = windowWidth * 0.6;
     float itemPaddingRight = 20;
 
-    ImGui::SameLine( windowWidth - itemWidth - itemPaddingRight );
+    SameLine( windowWidth - itemWidth - itemPaddingRight );
 
-    ImGui::PushItemWidth( itemWidth );
+    PushItemWidth( itemWidth );
 
-    ImGui::PushFont( consoleFont );
-    ImGui::DragFloat( fmt::format( "##ctrl[{0}]", i ).c_str(), &controlValues[i], 0.01f, -2.0f, 2.0f, "%.2f" );
-    ImGui::PopFont();
+    PushFont( _consoleFont );
+    DragFloat( fmt::format( "##ctrl[{0}]", i ).c_str(), &controlValues[i], 0.01f, -2.0f, 2.0f, "%.2f" );
+    PopFont();
 
-    ImGui::PopItemWidth();
+    PopItemWidth();
 
     // Apply modified control
     data->ctrl[i] = controlValues[i];
   }
 
-  ImGui::End();
+  End();
 }
 
 void __selectableOptionFromFlag( const char* name, mjtByte& flag ) {
@@ -276,45 +286,45 @@ void __selectableOptionFromFlag( const char* name, mjtByte& flag ) {
 
   selectStates[name] = flag;
 
-  ImGui::PushStyleColor( ImGuiCol_Header, { 0, 0, 0, 0 } );
-  if ( ImGui::Selectable( name, &selectStates[name] ) ) {
+  PushStyleColor( ImGuiCol_Header, { 0, 0, 0, 0 } );
+  if ( Selectable( name, &selectStates[name] ) ) {
     flag = selectStates[name];
   }
-  ImGui::PopStyleColor();
-  ImGui::SameLine();
-  ImGui::Text( "\t\t\t\t" );
-  ImGui::SameLine( ImGui::GetWindowWidth() - 30 );
-  ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, 0 );
-  ImGui::PushStyleColor( ImGuiCol_FrameBg, { 0, 0, 0, 0 } );
-  ImGui::Checkbox( "##", &selectStates[name] );
-  ImGui::PopStyleColor();
-  ImGui::PopStyleVar();
+  PopStyleColor();
+  SameLine();
+  Text( "\t\t\t\t" );
+  SameLine( GetWindowWidth() - 30 );
+  PushStyleVar( ImGuiStyleVar_FrameBorderSize, 0 );
+  PushStyleColor( ImGuiCol_FrameBg, { 0, 0, 0, 0 } );
+  Checkbox( "##", &selectStates[name] );
+  PopStyleColor();
+  PopStyleVar();
 }
 
 void _createMenuBar( mjvScene* scene, mjvOption* option ) {
-  if ( ImGui::BeginMainMenuBar() ) {
-    if ( ImGui::BeginMenu( "File" ) ) {
-      ImGui::MenuItem( "Do nothing..." );
-      ImGui::EndMenu();
+  if ( BeginMainMenuBar() ) {
+    if ( BeginMenu( "File" ) ) {
+      MenuItem( "Do nothing..." );
+      EndMenu();
     }
 
-    if ( ImGui::BeginMenu( "Rendering" ) ) {
+    if ( BeginMenu( "Rendering" ) ) {
       __selectableOptionFromFlag( "Wireframe", scene->flags[mjRND_WIREFRAME] );
       __selectableOptionFromFlag( "Shadows", scene->flags[mjRND_SHADOW] );
       __selectableOptionFromFlag( "Reflection", scene->flags[mjRND_REFLECTION] );
       __selectableOptionFromFlag( "Segmentation", scene->flags[mjRND_SEGMENT] );
       __selectableOptionFromFlag( "Skybox", scene->flags[mjRND_SKYBOX] );
 
-      if ( ImGui::MenuItem( "Disabled option", "[No shortcut]", false, false ) ) {
+      if ( MenuItem( "Disabled option", "[No shortcut]", false, false ) ) {
       } // Disabled item
-      ImGui::Separator();
-      if ( ImGui::MenuItem( "Do nothing", "CTRL+X" ) ) {
+      Separator();
+      if ( MenuItem( "Do nothing", "CTRL+X" ) ) {
       }
 
-      ImGui::EndMenu();
+      EndMenu();
     }
 
-    if ( ImGui::BeginMenu( "Visualization" ) ) {
+    if ( BeginMenu( "Visualization" ) ) {
       __selectableOptionFromFlag( "Actuator", option->flags[mjVIS_ACTUATOR] );
       __selectableOptionFromFlag( "Joint", option->flags[mjVIS_JOINT] );
       __selectableOptionFromFlag( "Contact Point", option->flags[mjVIS_CONTACTPOINT] );
@@ -327,10 +337,10 @@ void _createMenuBar( mjvScene* scene, mjvOption* option ) {
       __selectableOptionFromFlag( "Body BVH", option->flags[mjVIS_BODYBVH] );
       __selectableOptionFromFlag( "Mesh BVH", option->flags[mjVIS_MESHBVH] );
 
-      ImGui::EndMenu();
+      EndMenu();
     }
 
-    ImGui::EndMainMenuBar();
+    EndMainMenuBar();
   }
 }
 
@@ -356,7 +366,7 @@ void _applyDarkTheme() {
   ImColor border = ImVec4( 0.1f, 0.1f, 0.1f, 1.0f );
   ImColor shadow = ImVec4( 0.0f, 0.0f, 0.0f, 1.0f );
 
-  ImVec4* colors                         = ImGui::GetStyle().Colors;
+  ImVec4* colors                         = GetStyle().Colors;
   colors[ImGuiCol_Text]                  = text;
   colors[ImGuiCol_TextDisabled]          = textDisabled;
   colors[ImGuiCol_WindowBg]              = bg;
@@ -417,7 +427,7 @@ void _applyDarkTheme() {
   int noRounding    = 0;
   int maxRounding   = 5;
 
-  ImGuiStyle& style       = ImGui::GetStyle();
+  ImGuiStyle& style       = GetStyle();
   style.WindowPadding     = ImVec2( 8.00f, 8.00f );
   style.FramePadding      = ImVec2( 5.00f, 2.00f );
   style.CellPadding       = ImVec2( 6.00f, 6.00f );

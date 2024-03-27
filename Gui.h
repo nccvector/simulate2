@@ -12,11 +12,6 @@
 
 namespace Gui {
 
-extern const float applicationFontSize;
-extern const float consoleFontSize;
-extern ImFont* applicationFont;
-extern ImFont* consoleFont;
-
 void init( GLFWwindow* window );
 void destroy();
 void render( mjModel* model, mjData* data );

@@ -6,3 +6,6 @@ A port of mujoco simulate app, but with better UI (imgui -> docking)
 - The overall user experience is expected to be better than the native mujoco simulate.cc example
 
 <img src="resources/simulate2.png">
+
+#### TODO:
+- Make perturbations work appropriately

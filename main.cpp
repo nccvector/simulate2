@@ -7,9 +7,11 @@
 
 #include "imgui.h"
 
+#include "Logging.h"
+
+#include "Simulation.h"
 #include "Gui.h"
 #include "Input.h"
-#include "Simulation.h"
 
 GLFWwindow* window;
 
@@ -27,7 +29,8 @@ void initializeWindow() {
 
 void processOneFrame() {
   // Process inputs
-  Input::process( window, Simulation::model, Simulation::data, &Simulation::scene, &Simulation::cam );
+  Input::process( window, Simulation::model, Simulation::data, &Simulation::opt, &Simulation::pert, &Simulation::scene,
+      &Simulation::cam );
 
   // advance interactive simulation for 1/60 sec
   //  Assuming MuJoCo can simulate faster than real-time, which it usually can,
@@ -43,8 +46,9 @@ void processOneFrame() {
   glfwGetFramebufferSize( window, &viewport.width, &viewport.height );
 
   // update scene and render
-  mjv_updateScene(
-      Simulation::model, Simulation::data, &Simulation::opt, NULL, &Simulation::cam, mjCAT_ALL, &Simulation::scene );
+  DEBUG( "Pert select: {}", Simulation::pert.select );
+  mjv_updateScene( Simulation::model, Simulation::data, &Simulation::opt, &Simulation::pert, &Simulation::cam,
+      mjCAT_ALL, &Simulation::scene );
 
   mjr_render( viewport, &Simulation::scene, &Simulation::con );
 
@@ -59,6 +63,8 @@ void processOneFrame() {
 
 
 int main() {
+  spdlog::set_level( spdlog::level::trace );
+
   initializeWindow();
   Gui::init( window );
 

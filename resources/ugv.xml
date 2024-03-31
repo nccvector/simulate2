@@ -1,4 +1,6 @@
 <mujoco model="ugv">
+
+    <statistic center="0 0 0.5" extent="5.2"/>
     <option gravity="0 0 -10"/>
 
     <!--Actuators-->

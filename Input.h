@@ -27,7 +27,8 @@ extern int vrWindowWidth;
 extern int vrWindowHeight;
 
 void ensureDeltaZeroFirstFrame( GLFWwindow* window );
-void process( GLFWwindow* window, mjModel* model, mjData* data, mjvScene* scene, mjvCamera* camera );
+void process( GLFWwindow* window, mjModel* model, mjData* data, mjvOption* opt, mjvPerturb* pert, mjvScene* scene,
+    mjvCamera* camera );
 
 } // namespace Input
 

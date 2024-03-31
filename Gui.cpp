@@ -4,17 +4,21 @@
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
+#include "Logging.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/sinks/callback_sink.h"
+
 #include "fmt/core.h"
 
 #include "Gui.h"
 #include "Input.h"
 #include "Simulation.h"
+#include "Console.h"
 
 
 #include <map>
-#include <iostream>
-#include <glob.h>   // glob(), globfree()
-#include <string.h> // memset()
+#include <glob.h> // glob(), globfree()
 #include <vector>
 #include <string>
 
@@ -26,6 +30,22 @@ ImFont* _applicationFont;
 ImFont* _applicationFontBold;
 ImFont* _consoleFont;
 ImFont* _consoleFontBold;
+
+Console* _console;
+
+void RegisterLogCallback(){
+  auto callback_sink = std::make_shared<spdlog::sinks::callback_sink_mt>([](const spdlog::details::log_msg &msg) {
+    _console->AddLog(msg.payload.data());
+    // for example you can be notified by sending an email to yourself
+  });
+  callback_sink->set_level(spdlog::level::trace);
+
+//  auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+
+//  spdlog::default_logger()->sinks().push_back(console_sink);
+  spdlog::default_logger()->sinks().push_back(callback_sink);
+}
+
 
 std::vector<std::string> glob( const std::string& pattern ) {
   using namespace std;
@@ -97,10 +117,10 @@ void _createSceneDropdown() {
   PopItemWidth();
 
   if ( Button( "Load", { -1, 30 } ) ) {
-    std::cout << "Destroying current scene...\n";
+    DEBUG( "Destroying current scene", nullptr );
     Simulation::unloadScene(); // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
 
-    std::cout << "Loading " << items[currentItem] << "\n";
+    DEBUG( "Loading {}", items[currentItem] );
     Simulation::loadScene(
         items[currentItem] ); // TODO: pass this function as a pointer (attachCallback) to get rid of dependency
   }
@@ -129,6 +149,9 @@ void render( mjModel* model, mjData* data ) {
   // A correct fix would be to call updatesim after loading new scene
   _createSceneDropdown();
 
+  static bool consoleOpen = true;
+  _console->Draw("Console", &consoleOpen);
+
   ShowDemoWindow( nullptr );
 
   PopFont();
@@ -152,6 +175,12 @@ void init( GLFWwindow* window ) {
   // Enable docking
   ImGuiIO& io = GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+  // Create console
+  _console = new Console();
+
+  // Bind console output to spdlog log callback
+  RegisterLogCallback();
 }
 
 void destroy() {
@@ -220,7 +249,7 @@ void _createStatePanel( mjModel* model, mjData* data ) {
 
   Begin( "State" );
   for ( int i = 0; i < numDOFs; i++ ) {
-    PushFont(_applicationFontBold);
+    PushFont( _applicationFontBold );
     Text( fmt::format( "q[{0}]: ", i ).c_str() );
     PopFont();
 
@@ -256,7 +285,7 @@ void _createControlPanel( mjModel* model, mjData* data ) {
     // Get current control
     controlValues[i] = data->ctrl[i];
 
-    PushFont(_applicationFontBold);
+    PushFont( _applicationFontBold );
     Text( fmt::format( "Control[{0}]: ", i ).c_str() );
     PopFont();
 

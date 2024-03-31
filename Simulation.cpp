@@ -14,6 +14,7 @@ mjvCamera cam;  // abstract camera
 mjvOption opt;  // visualization options
 mjvScene scene; // abstract scene
 mjrContext con; // custom GPU context
+mjvPerturb pert;
 
 void loadScene( const char* path ) {
   const int errBufferLen = 1000;

@@ -27,15 +27,16 @@ int vrWindowHeight = 0;
 // GLFW only supports callbacks for scroll. There is no function like glfwGetScroll etc
 void _scrollCallback( GLFWwindow* window, double x, double y );
 void _processGuiInputs( GLFWwindow* window );
-void _processViewportInputs( GLFWwindow* window, mjModel* model, mjvScene* scene, mjvCamera* camera );
+void _processViewportInputs(
+    GLFWwindow* window, mjModel* model, mjData* data, mjvOption* opt, mjvPerturb* pert, mjvScene* scene, mjvCamera* camera );
 
 
-void process( GLFWwindow* window, mjModel* model, mjData* data, mjvScene* scene, mjvCamera* camera ) {
+void process( GLFWwindow* window, mjModel* model, mjData* data, mjvOption* opt, mjvPerturb* pert, mjvScene* scene, mjvCamera* camera ) {
   ImGuiIO& io = ImGui::GetIO();
   if ( io.WantCaptureMouse ) {
     _processGuiInputs( window );
   } else {
-    _processViewportInputs( window, model, scene, camera );
+    _processViewportInputs( window, model, data, opt, pert, scene, camera );
   }
 }
 

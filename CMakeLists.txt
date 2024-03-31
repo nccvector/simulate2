@@ -17,6 +17,9 @@ set(GLFW_BUILD_TESTS OFF)
 set(GLFW_INSTALL OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/glfw)
 
+# Add spdlog
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/spdlog)
+
 # Add imgui
 set(IMGUI_INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
@@ -44,6 +47,7 @@ include_directories(
         external/glad/include
         external/fmt/include
         ${GLFW_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/spdlog/include
         ${IMGUI_INCLUDE_DIRS}
 )
 
@@ -61,6 +65,7 @@ target_link_libraries(${PROJECT_NAME}
         glfw
         mujoco::mujoco
         fmt
+        spdlog
 )
 
 # Copy resources on change

@@ -33,17 +33,20 @@ ImFont* _consoleFontBold;
 
 Console* _console;
 
-void RegisterLogCallback(){
-  auto callback_sink = std::make_shared<spdlog::sinks::callback_sink_mt>([](const spdlog::details::log_msg &msg) {
-    _console->AddLog(msg.payload.data());
-    // for example you can be notified by sending an email to yourself
-  });
-  callback_sink->set_level(spdlog::level::trace);
+void RegisterLogCallback() {
+  auto callback_sink = std::make_shared<spdlog::sinks::callback_sink_mt>( //
+      []( const spdlog::details::log_msg& msg ) {
+        _console->AddLog( msg.payload.data() );
+        // for example you can be notified by sending an email to yourself
+      } //
+  );
 
-//  auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+  callback_sink->set_level( spdlog::level::trace );
 
-//  spdlog::default_logger()->sinks().push_back(console_sink);
-  spdlog::default_logger()->sinks().push_back(callback_sink);
+  //  auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+
+  //  spdlog::default_logger()->sinks().push_back(console_sink);
+  spdlog::default_logger()->sinks().push_back( callback_sink );
 }
 
 
@@ -150,7 +153,7 @@ void render( mjModel* model, mjData* data ) {
   _createSceneDropdown();
 
   static bool consoleOpen = true;
-  _console->Draw("Console", &consoleOpen);
+  _console->Draw( "Console", &consoleOpen );
 
   ShowDemoWindow( nullptr );
 

@@ -29,8 +29,15 @@ void initializeWindow() {
 
 void processOneFrame() {
   // Process inputs
-  Input::process( window, Simulation::model, Simulation::data, &Simulation::opt, &Simulation::pert, &Simulation::scene,
-      &Simulation::cam );
+  Input::process(         //
+      window,             //
+      Simulation::model,  //
+      Simulation::data,   //
+      &Simulation::opt,   //
+      &Simulation::pert,  //
+      &Simulation::scene, //
+      &Simulation::cam    //
+  );
 
   // advance interactive simulation for 1/60 sec
   //  Assuming MuJoCo can simulate faster than real-time, which it usually can,
@@ -46,9 +53,15 @@ void processOneFrame() {
   glfwGetFramebufferSize( window, &viewport.width, &viewport.height );
 
   // update scene and render
-  DEBUG( "Pert select: {}", Simulation::pert.select );
-  mjv_updateScene( Simulation::model, Simulation::data, &Simulation::opt, &Simulation::pert, &Simulation::cam,
-      mjCAT_ALL, &Simulation::scene );
+  mjv_updateScene(       //
+      Simulation::model, //
+      Simulation::data,  //
+      &Simulation::opt,  //
+      &Simulation::pert, //
+      &Simulation::cam,  //
+      mjCAT_ALL,         //
+      &Simulation::scene //
+  );
 
   mjr_render( viewport, &Simulation::scene, &Simulation::con );
 
@@ -69,6 +82,8 @@ int main() {
   Gui::init( window );
 
   Simulation::loadScene( "resources/ugv.xml" );
+
+  mjv_defaultPerturb( &Simulation::pert );
 
   // run main loop, target real-time simulation and 60 fps rendering
   while ( !glfwWindowShouldClose( window ) ) {
